@@ -2,6 +2,10 @@
 
 ## install
 
+```sh
+deno install -A https://raw.githubusercontent.com/Showichiro/ts-convertor-generator-from-excel/main/ts-convertor-generator.ts
+```
+
 ## Usage
 
 ```console
