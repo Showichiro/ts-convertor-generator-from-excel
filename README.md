@@ -1,5 +1,7 @@
 # ts-convertor-generator
 
+[![status](https://github.com/Showichiro/ts-convertor-generator-from-excel/actions/workflows/deno.yml/badge.svg)](https://github.com/Showichiro/ts-convertor-generator-from-excel/actions/workflows/deno.yml)
+
 ## install
 
 ```sh
