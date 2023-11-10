@@ -39,12 +39,13 @@ const TARGET = "target" as const;
 const METHOD = "method" as const;
 const DEFAULT_OUTDIR = "./out" as const;
 const HELP = `
-ts-generator from excel
+ts-convertor-generator from excel
 
 Usage: ts-convertor-generator [option]
 
 Options:
  -f, --file <file>                   excel file
+ --fileDir <fileDir>                 excel file directory
  -o, --outdir <outdir>               output directory
  -h, --help                           show help message
 
@@ -53,6 +54,7 @@ Examples:
  $ ts-convertor-generator -f example.xlsx
  $ ts-convertor-generator --file example.xlsx -o ./out
  $ ts-convertor-generator -f example.xlsx -f example2.xlsx --outDir ./dist
+ $ ts-convertor-generator --fileDir ./excel --outdir ./dist
 ` as const;
 
 // run
@@ -61,14 +63,30 @@ Examples:
     echo`${HELP}`;
     Deno.exit(0);
   }
+  let fileList: string[] = [];
   // get filenames
   const files = argv.f || argv.file;
-  if (!files) {
+  const fileDir = argv.fileDir;
+  if (!files && !fileDir) {
     echo`you need to choose file`;
     echo`${HELP}`;
     Deno.exit(1);
   }
-  const fileList = typeof files === "string" ? [files] : files as string[];
+  if (typeof fileDir === "string") {
+    const dir = Deno.readDirSync(fileDir);
+    for await (const entry of dir) {
+      if (entry.isFile && entry.name.endsWith(".xlsx")) {
+        fileList = [...fileList, `${fileDir}/${entry.name}`];
+      }
+    }
+  }
+  if (files) {
+    if (typeof files === "string") {
+      fileList = [...fileList, files];
+    } else if (Array.isArray(files)) {
+      fileList = [...fileList, ...files];
+    }
+  }
   echo`check ${files}...`;
   // check file exist
   fileList.forEach((file) => {
