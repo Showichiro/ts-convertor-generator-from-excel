@@ -47,22 +47,26 @@ jobs:
     needs: test
     
     steps:
+    - name: Setup repo
+      uses: actions/checkout@v3
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@v1
+      # uses: denoland/setup-deno@61fe2df320078202e33d7d5ad347e7dcfa0e8f31  # v1.1.2
+      with:
+        deno-version: v1.38.0
+
     - name: Build for Windows
       run: deno compile --unstable -A --target x86_64-pc-windows-msvc --output dist/ ts-convertor-generator.ts
   
     - name: Build for Linux
       run: deno compile --unstable -A --target x86_64-unknown-linux-gnu --output dist/ ts-convertor-generator.ts
+    
+    - name: upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: executableFiles
+        path: dist/
 
-  post-build:
-    runs-on: ubuntu-latest
-    
-    needs: build
-    
-    steps:
-      - name: upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: executableFiles
-          path: dist/
             
       
