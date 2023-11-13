@@ -9,6 +9,7 @@ export type TargetRow = {
   from_data_type: string;
   to_property: string;
   to_data_type: string;
+  method: string | null;
 };
 
 export type MethodRow = {
@@ -36,7 +37,6 @@ const dirExists = (dirpath: string): boolean => {
 };
 
 const TARGET = "target" as const;
-const METHOD = "method" as const;
 const DEFAULT_OUTDIR = "./out" as const;
 const HELP = `
 ts-convertor-generator from excel
@@ -124,12 +124,8 @@ Examples:
       echo`${file}: target sheet is not exists`;
       Deno.exit(1);
     }
-    const methodSheet = workbook.Sheets[METHOD];
     // get sheet data
     const targetData = XLSX.utils.sheet_to_json<TargetRow>(targetSheet);
-    const methodData = methodSheet
-      ? XLSX.utils.sheet_to_json<MethodRow>(methodSheet)
-      : null;
     // generate ts file from sheet data
     // type definition of from
     const fromTypeDef = targetData.reduce<
@@ -158,16 +154,10 @@ export const convert = (from: From): To => {
   return {
     ${
       targetData.map((row) => {
-        if (methodData) {
-          const method = methodData.find((methodRow) =>
-            row.from_data_type === methodRow.from_data_type &&
-            row.to_data_type === methodRow.to_data_type
-          );
-          if (method) {
-            return `${row.to_property}: ${
-              method.method.replaceAll("?", `from.${row.from_property}`)
-            }`;
-          }
+        if (row.method) {
+          return `${row.to_property}: ${
+            row.method.replaceAll("?", `from.${row.from_property}`)
+          }`;
         }
         return `${row.to_property}: from.${row.from_property}`;
       })
