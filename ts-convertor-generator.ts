@@ -2,6 +2,7 @@
 import { argv, echo } from "npm:zx@7.1.1";
 // @deno-types="https://cdn.sheetjs.com/xlsx-0.20.0/package/types/index.d.ts"
 import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
+import { Eta } from "https://deno.land/x/eta@v3.0.3/src/index.ts";
 
 // types
 export type TargetRow = {
@@ -17,6 +18,28 @@ export type MethodRow = {
   to_data_type: string;
   method: string;
 };
+
+const TEMPLATE = `
+export type From = { 
+  <% it.rows.forEach((row) => { %>
+    <%= row.from_property %>: <%= row.from_data_type %>;
+  <% }) %> 
+};
+
+export type To = { 
+  <% it.rows.forEach((row) => { %>
+    <%= row.to_property %>: <%= row.to_data_type %>;
+  <% }) %>
+};
+
+export const convertor = (from: From): To => {
+  return ({ 
+  <% it.rows.forEach((row) => { %>
+    <%= row.to_property %>: <%= row.method %>,
+  <% }) %>
+  })
+};
+` as const;
 
 const fileExists = (filepath: string): boolean => {
   try {
@@ -111,6 +134,7 @@ Examples:
 
   Deno.mkdirSync(outDir);
 
+  const eta = new Eta();
   // exec every file
   fileList.forEach((file) => {
     const xlsxFileName = file.split(".")[0];
@@ -127,57 +151,21 @@ Examples:
     // get sheet data
     const targetData = XLSX.utils.sheet_to_json<TargetRow>(targetSheet);
     // generate ts file from sheet data
-    // type definition of from
-    const fromTypeDef = targetData.reduce<
-      Record<TargetRow["from_property"], TargetRow["from_data_type"]>
-    >(
-      (prev, row) => ({ ...prev, [row.from_property]: row.from_data_type }),
-      {},
-    );
-
-    // type definition of to
-    const toTypeDef = targetData.reduce<
-      Record<TargetRow["to_property"], TargetRow["to_data_type"]>
-    >(
-      (prev, current) => ({
-        ...prev,
-        [current.to_property]: current.to_data_type,
-      }),
-      {},
-    );
-    // file content
-    const fileContent = `export type From = ${
-      JSON.stringify(fromTypeDef).replaceAll('"', "")
-    }
-export type To = ${JSON.stringify(toTypeDef).replaceAll('"', "")}
-export const convert = (from: From): To => {
-  return {
-    ${
-      targetData.map((row) => {
-        if (row.method) {
-          return `${row.to_property}: ${
-            row.method.replaceAll("?", `from.${row.from_property}`)
-          }`;
-        }
-        return `${row.to_property}: from.${row.from_property}`;
-      })
-        .join(
-          ",\n",
-        )
-    }
-  }
-}
-  `;
-
     const textEncorder = new TextEncoder();
     const filename = `${xlsxFileName.split("/").reverse()[0]}-converter.ts`;
 
     // write file
     Deno.writeFileSync(
       filename,
-      textEncorder.encode(fileContent),
+      textEncorder.encode(eta.renderString(TEMPLATE, {
+        rows: targetData.map((row) => ({
+          ...row,
+          method: row.method
+            ? `${row.method.replaceAll("?", `from.${row.from_property}`)}`
+            : `from.${row.from_property}`,
+        })),
+      })),
     );
-
     // move file
     Deno.renameSync(filename, `${outDir}/${filename}`);
     echo`generated ${outDir}/${filename}`;

@@ -2,6 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "npm:@types/node": "npm:@types/node@18.16.19",
       "npm:zx@7.1.1": "npm:zx@7.1.1"
     },
     "npm": {
@@ -317,6 +318,17 @@
     }
   },
   "remote": {
-    "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs": "5171b0a510268db6e338dd3d9c0e8ada6b7db7bf61c77d044ccc30198023c642"
+    "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs": "5171b0a510268db6e338dd3d9c0e8ada6b7db7bf61c77d044ccc30198023c642",
+    "https://deno.land/x/eta@v3.0.3/src/compile-string.ts": "e919c1a5e2cf460dbbd93047ab3548a630e5eb5c7fa019335c08e95b50e86cd7",
+    "https://deno.land/x/eta@v3.0.3/src/compile.ts": "146782227ddd5c423d07dedb2be40a2a5643c7429d9a3af5ac9a79c21bf7ae95",
+    "https://deno.land/x/eta@v3.0.3/src/config.ts": "7e2971ba3ec4b31b5f1ae0ea71957f0a2b868285192be77836d65ca27adb4f90",
+    "https://deno.land/x/eta@v3.0.3/src/core.ts": "53a9a10c8fc06ce88155a125ffb7db724afb7b4e16d6f646b20a29f27baa2cdf",
+    "https://deno.land/x/eta@v3.0.3/src/err.ts": "e9732b5f7fe729fed9d67868ff7d87ef1002d45d0a8a4e8f7fb1fa9ec2e2d50b",
+    "https://deno.land/x/eta@v3.0.3/src/file-handling.ts": "ac54a84c4e73f47629d69725b8557080caf4e03cf34413b4a2a3f3a10c0abb25",
+    "https://deno.land/x/eta@v3.0.3/src/index.ts": "fa1e18db556462293408c7a455b05b5253aae460c97811f88bb023cdc3f95f62",
+    "https://deno.land/x/eta@v3.0.3/src/parse.ts": "8cb25b4ccf58ea7f08fe9835f7eb8bf45917d6d743d28d1e25cadc9fc908cb32",
+    "https://deno.land/x/eta@v3.0.3/src/render.ts": "bfd57548d5fdae11c1c1683ff748783c1f85be3db3c24fcc80ce915692b004dd",
+    "https://deno.land/x/eta@v3.0.3/src/storage.ts": "c40bd31cdd6f1218c86f70067282709e2f2c7fa7eea67547be950e1ed5d4bd4c",
+    "https://deno.land/x/eta@v3.0.3/src/utils.ts": "1994c8d228195558fb6785fb00a97cf21a457df598a6ab1945170f7a4b7f00d9"
   }
 }
