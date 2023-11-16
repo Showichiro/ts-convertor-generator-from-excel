@@ -8,6 +8,12 @@
 deno install -A https://raw.githubusercontent.com/Showichiro/ts-convertor-generator-from-excel/main/ts-convertor-generator.ts
 ```
 
+## upgrade
+
+```sh
+deno install -A -f -r https://raw.githubusercontent.com/Showichiro/ts-convertor-generator-from-excel/main/ts-convertor-generator.ts
+```
+
 ## Usage
 
 ```console
@@ -20,6 +26,7 @@ Options:
  --fileDir <fileDir>                 excel file directory
  -o, --outdir <outdir>               output directory
  -h, --help                           show help message
+ -v, --version                        show version
 
 Examples:
 
