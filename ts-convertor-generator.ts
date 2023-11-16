@@ -8,9 +8,12 @@ import { Eta } from "https://deno.land/x/eta@v3.0.3/src/index.ts";
 export type TargetRow = {
   from_property: string;
   from_data_type: string;
+  from_data_optional: string;
   to_property: string;
   to_data_type: string;
+  to_data_optional: string;
   method: string | null;
+  default_value: string | null;
 };
 
 export type MethodRow = {
@@ -19,23 +22,32 @@ export type MethodRow = {
   method: string;
 };
 
+type Config =
+  | "from_type_name"
+  | "to_type_name";
+
+export type ConfigType = {
+  config: Config;
+  value: string;
+};
+
 const TEMPLATE = `
-export type From = { 
+export type <%= it.from_type_name %> = { 
   <% it.rows.forEach((row) => { %>
-    <%= row.from_property %>: <%= row.from_data_type %>;
+    <%= row.from_property %><%= row.from_data_optional %>: <%= row.from_data_type %>;
   <% }) %> 
 };
 
-export type To = { 
+export type <%= it.to_type_name %> = { 
   <% it.rows.forEach((row) => { %>
-    <%= row.to_property %>: <%= row.to_data_type %>;
+    <%= row.to_property %><%= row.to_data_optional %>: <%= row.to_data_type %>;
   <% }) %>
 };
 
-export const convertor = (from: From): To => {
+export const convertor = (from: <%= it.from_type_name %>): <%= it.to_type_name %> => {
   return ({ 
   <% it.rows.forEach((row) => { %>
-    <%= row.to_property %>: <%= row.method %>,
+    <%= row.to_property %>: <%~ row.method %>,
   <% }) %>
   })
 };
@@ -60,6 +72,7 @@ const dirExists = (dirpath: string): boolean => {
 };
 
 const TARGET = "target" as const;
+const CONFIG = "config" as const;
 const DEFAULT_OUTDIR = "./out" as const;
 const HELP = `
 ts-convertor-generator from excel
@@ -150,6 +163,14 @@ Examples:
     }
     // get sheet data
     const targetData = XLSX.utils.sheet_to_json<TargetRow>(targetSheet);
+    const configSheet = workbook.Sheets[CONFIG];
+    const config = new Map<Config, string>(
+      configSheet
+        ? XLSX.utils
+          .sheet_to_json<ConfigType>(configSheet)
+          .map<[Config, string]>((val) => [val.config, val.value])
+        : null,
+    );
     // generate ts file from sheet data
     const textEncorder = new TextEncoder();
     const filename = `${xlsxFileName.split("/").reverse()[0]}-converter.ts`;
@@ -158,11 +179,25 @@ Examples:
     Deno.writeFileSync(
       filename,
       textEncorder.encode(eta.renderString(TEMPLATE, {
+        from_type_name: config.get("from_type_name") ?? "From",
+        to_type_name: config.get("to_type_name") ?? "To",
         rows: targetData.map((row) => ({
           ...row,
-          method: row.method
-            ? `${row.method.replaceAll("?", `from.${row.from_property}`)}`
-            : `from.${row.from_property}`,
+          from_data_optional: row.from_data_optional === "true" ? "?" : "",
+          to_data_optional: row.to_data_optional === "true" ? "?" : "",
+          method: (row.method
+            ? `${
+              row.method.replaceAll(
+                "#",
+                `from${
+                  row.from_data_optional === "true" ? "?" : ""
+                }.${row.from_property}`,
+              )
+            }`
+            : `from${
+              row.from_data_optional === "true" ? "?" : ""
+            }.${row.from_property}`) +
+            (row.default_value ? ` ?? ${row.default_value}` : ""),
         })),
       })),
     );
