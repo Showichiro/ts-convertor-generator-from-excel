@@ -74,6 +74,7 @@ const dirExists = (dirpath: string): boolean => {
 const TARGET = "target" as const;
 const CONFIG = "config" as const;
 const DEFAULT_OUTDIR = "./out" as const;
+const VERSION = "v0.1.0" as const;
 const HELP = `
 ts-convertor-generator from excel
 
@@ -84,6 +85,7 @@ Options:
  --fileDir <fileDir>                 excel file directory
  -o, --outdir <outdir>               output directory
  -h, --help                           show help message
+ -v, --version                        show version
 
 Examples:
 
@@ -99,6 +101,12 @@ Examples:
     echo`${HELP}`;
     Deno.exit(0);
   }
+
+  if (argv.version || argv.v) {
+    echo`ts-convertor-generator ${VERSION}`;
+    Deno.exit(0);
+  }
+
   let fileList: string[] = [];
   // get filenames
   const files = argv.f || argv.file;
